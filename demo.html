@@ -1,0 +1,108 @@
+<html>
+
+<head>
+    <title>grapecity_spreadJS_demo</title>
+    <script src="jquery_3.1.1.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="gc.spread.sheets.excel2013white.14.2.2.css" type="text/css">
+    <script src="gc.spread.sheets.all.14.2.2.min.js" type="text/javascript"></script>
+    <script src="gc.spread.excelio.14.2.2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.grapecity.com.cn/spreadjs/scripts/FileSaver.min.js" type="text/javascript"></script>
+    <script src="gc.spread.sheets.resources.zh.14.2.2.min.js" type="text/javascript"></script>
+    <script src="gc.spread.sheets.print.14.2.2.min.js" type="text/javascript"></script>
+    <script src="gc.spread.sheets.pdf.14.2.2.min.js" type="text/javascript"></script>
+    <script src="gc.spread.sheets.charts.14.2.2.min.js" type="text/javascript"></script>
+    <script src="v14.js" type="text/javascript"></script>
+    <style type="text/css">
+        #ss {
+            height: 400px;
+            width: 100%
+        }
+        p{
+            color: #336699;
+            text-align: center;
+        }
+        button{
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <p>点击改变单元格类型</p>
+    <button id="change">变更单元格类型</button>
+    <div id="ss"></div>
+    <script type="text/javascript">
+        // Title：变更单元格类型
+        // Description：改变单元格类型（重写base）
+        // Tag:单元格类型，改变
+        GC.Spread.Common.CultureManager.culture('zh-cn');
+        
+        var spreadNS = GC.Spread.Sheets;
+        
+        $(document).ready(function() {
+            var spread = new GC.Spread.Sheets.Workbook(document.getElementById("ss"));
+            initSpread(spread);
+        });
+        
+        // 重写Base类型
+        var CustomBase = spreadNS.CellTypes.Base;
+        
+        var oldPaint = spreadNS.CellTypes.Base.prototype.paint;
+        
+        CustomBase.prototype.paint = function(context, value, x1, y1, a1, b1, style, ctx) {
+            if (!context) {
+                return;
+            }
+            if (this.showEffect) {
+                context.save();
+                let base = a1 > b1 ? b1 / 2 : a1 / 2;
+                context.beginPath();
+                context.moveTo(x1 + base, y1);
+                context.lineTo(x1, y1 + base);
+                context.lineTo(x1, y1);
+        
+                context.fillStyle = 'blue';
+                context.fill();
+                context.closePath();
+                context.restore();
+            }
+            oldPaint.apply(this, [context, value, x1, y1, a1, b1, style, ctx]);
+        };
+        
+        
+        
+        
+        function initSpread(spread) {
+            var sheet = spread.getSheet(0);
+            sheet.suspendPaint();
+        
+            sheet.setRowHeight(0, 60);
+            sheet.setColumnWidth(0, 150);
+        
+            var myCellType = new spreadNS.CellTypes.Text();
+        
+        
+            // 设置参数为true时画圈，不设置或设置false时恢复
+            myCellType.showEffect = true;
+        
+            sheet.setCellType(0, 0, myCellType);
+        
+            sheet.resumePaint();
+        
+            $("#change").click(function() {
+                myCellType = new spreadNS.CellTypes.Button();
+                myCellType.showEffect = true;
+        
+                myCellType.text("Margin");
+                myCellType.marginLeft(15);
+                myCellType.marginTop(7);
+                myCellType.marginRight(15);
+                myCellType.marginBottom(7);
+        
+                sheet.setCellType(0, 0, myCellType);
+            });
+        }
+    </script>
+</body>
+
+</html>
